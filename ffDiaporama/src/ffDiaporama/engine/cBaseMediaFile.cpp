@@ -113,11 +113,11 @@ int  Exiv2PatchVersion=EXIV2_PATCH_VERSION;
 #define VC_USERDATA     0x00000008
 #define VC_FLUSHED      0x00000010
 
-#define PIXFMT          PIX_FMT_RGB24
+#define PIXFMT          AV_PIX_FMT_RGB24
 #define QTPIXFMT        QImage::Format_RGB888
 
-AVFrame *ALLOCFRAME()           { return avcodec_alloc_frame(); }
-void    FREEFRAME(AVFrame **Buf){ avcodec_free_frame(Buf); *Buf=NULL; }
+// AVFrame *ALLOCFRAME()           { return avcodec_alloc_frame(); }
+// void    FREEFRAME(AVFrame **Buf){ avcodec_free_frame(Buf); *Buf=NULL; }
 
 //****************************************************************************************************************************************************************
 
@@ -173,7 +173,7 @@ bool gm_decode_base64(uchar *buffer,uint &len) {
     return true;
 }
 
-#ifdef USETAGLIB
+/*#ifdef USETAGLIB
     QImage *GetEmbededImage(QString FileName) {
         // Try to get embeded image
         QImage *Image=new QImage();
@@ -225,7 +225,7 @@ bool gm_decode_base64(uchar *buffer,uint &len) {
         }
         //*********** MP4/M4A => don't work with M4V or MP4 video
         #ifdef TAGLIBWITHMP4
-        if ((Image->isNull())&&(/*(QFileInfo(FileName).suffix().toLower()=="mp4")||*/(QFileInfo(FileName).suffix().toLower()=="m4a")||(QFileInfo(FileName).suffix().toLower()=="m4v"))) {
+        if ((Image->isNull())&&(/*(QFileInfo(FileName).suffix().toLower()=="mp4")|| /(QFileInfo(FileName).suffix().toLower()=="m4a")||(QFileInfo(FileName).suffix().toLower()=="m4v"))) {
             TagLib::MP4::File MP4File(TagLib::FileName(FileName.toLocal8Bit()));
             if ((MP4File.tag())&&(MP4File.tag()->itemListMap().contains("covr"))) {
                 TagLib::MP4::CoverArtList coverArtList = MP4File.tag()->itemListMap()["covr"].toCoverArtList();
@@ -258,7 +258,7 @@ bool gm_decode_base64(uchar *buffer,uint &len) {
         }
     }
 #endif
-
+*/
 
 //====================================================================================================================
 
@@ -2402,7 +2402,7 @@ bool cVideoFile::GetChildFullInformationFromFile(cCustomIcon *Icon,QStringList *
                             AVFrame *FrameRGB=ALLOCFRAME();
                             if ((FrameRGB)&&(!Thumbnail.isNull())) {
                                 avpicture_fill((AVPicture *)FrameRGB,Thumbnail.bits(),PIXFMT,RealW,RealH);
-                                struct SwsContext *img_convert_ctx=sws_getContext(FrameYUV->width,FrameYUV->height,(PixelFormat)FrameYUV->format,RealW,RealH,PIXFMT,SWS_FAST_BILINEAR,NULL,NULL,NULL);
+                                struct SwsContext *img_convert_ctx=sws_getContext(FrameYUV->width,FrameYUV->height,(AVPixelFormat)FrameYUV->format,RealW,RealH,PIXFMT,SWS_FAST_BILINEAR,NULL,NULL,NULL);
                                 if (img_convert_ctx!=NULL) {
                                     int ret = sws_scale(img_convert_ctx,FrameYUV->data,FrameYUV->linesize,0,FrameYUV->height,FrameRGB->data,FrameRGB->linesize);
                                     if (ret>0) {
@@ -2722,9 +2722,9 @@ int cVideoFile::VideoFilter_Open() {
             ToLog(LOGMSG_CRITICAL,QString("Error in cVideoFile::VideoFilter_Open : avfilter_graph_create_filter: src"));
             return result;
         }
-        std::vector<PixelFormat> m_formats;
-        m_formats.push_back(PIX_FMT_YUVJ420P);
-        m_formats.push_back(PIX_FMT_NONE);      /* always add none to get a terminated list in Libav world */
+        std::vector<AVPixelFormat> m_formats;
+        m_formats.push_back(AV_PIX_FMT_YUVJ420P);
+        m_formats.push_back(AV_PIX_FMT_NONE);      /* always add none to get a terminated list in Libav world */
         if ((result=avfilter_graph_create_filter(&VideoFilterOut,outFilter,"out",NULL,NULL,VideoFilterGraph))<0) {
             ToLog(LOGMSG_CRITICAL,QString("Error in cVideoFile::VideoFilter_Open : avfilter_graph_create_filter: out"));
             return result;
@@ -2742,8 +2742,8 @@ int cVideoFile::VideoFilter_Open() {
                  LibavVideoFile->streams[VideoStreamNumber]->codec->sample_aspect_ratio.num,LibavVideoFile->streams[VideoStreamNumber]->codec->sample_aspect_ratio.den
         );
 
-        AVFilter *srcFilter=avfilter_get_by_name("buffer");
-        AVFilter *outFilter=avfilter_get_by_name("buffersink");
+       const AVFilter *srcFilter=avfilter_get_by_name("buffer");
+       const AVFilter *outFilter=avfilter_get_by_name("buffersink");
 
         if ((result=avfilter_graph_create_filter(&VideoFilterIn,srcFilter,"in",args,NULL,VideoFilterGraph))<0) {
             ToLog(LOGMSG_CRITICAL,QString("Error in cVideoFile::VideoFilter_Open : avfilter_graph_create_filter: src"));
@@ -3482,7 +3482,7 @@ QImage *cVideoFile::ConvertYUVToRGB(bool PreviewMode,AVFrame *Frame) {
         struct SwsContext *img_convert_ctx=sws_getContext(
             Frame->width,                                                     // Src width
             Frame->height,                                                    // Src height
-            (PixelFormat)Frame->format,                                       // Src Format
+            (AVPixelFormat)Frame->format,                                       // Src Format
             W,                                                                // Destination width
             H,                                                                // Destination height
             PIXFMT,                                                           // Destination Format
@@ -3565,11 +3565,11 @@ QImage *cVideoFile::ImageAt(bool PreviewMode,int64_t Position,cSoundBlockList *S
 int cVideoFile::getThreadFlags(AVCodecID ID) {
     int Ret=0;
     switch (ID) {
-        case CODEC_ID_PRORES:
-        case CODEC_ID_MPEG1VIDEO:
-        case CODEC_ID_DVVIDEO:
-        case CODEC_ID_MPEG2VIDEO:   Ret=FF_THREAD_SLICE;                    break;
-        case CODEC_ID_H264 :        Ret=FF_THREAD_FRAME|FF_THREAD_SLICE;    break;
+        case AV_CODEC_ID_PRORES:
+        case AV_CODEC_ID_MPEG1VIDEO:
+        case AV_CODEC_ID_DVVIDEO:
+        case AV_CODEC_ID_MPEG2VIDEO:   Ret=FF_THREAD_SLICE;                    break;
+        case AV_CODEC_ID_H264 :        Ret=FF_THREAD_FRAME|FF_THREAD_SLICE;    break;
         default:                    Ret=FF_THREAD_FRAME;                    break;
     }
     return Ret;

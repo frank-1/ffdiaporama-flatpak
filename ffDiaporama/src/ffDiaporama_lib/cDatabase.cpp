@@ -462,7 +462,8 @@ cFilesTable::cFilesTable(cDatabase *Database):cDatabaseTable(Database) {
                             "BasicProperties    text,"\
                             "ExtendedProperties text,"\
                             "Thumbnail16        binary,"\
-                            "Thumbnail100       binary"\
+                            "Thumbnail100       binary,"\
+                            "SoundWave          text"\
                      ")";
     CreateIndexQuery.append("CREATE INDEX idx_MediaFiles_Key ON MediaFiles (Key)");
     CreateIndexQuery.append("CREATE INDEX idx_MediaFiles_FolderKey ON MediaFiles (FolderKey,ShortName)");

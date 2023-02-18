@@ -241,7 +241,9 @@ void cShotComposer::RefreshControls(bool UpdateInteractiveZone) {
     InRefreshControls=true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    if ((BlockSelectMode==SELECTMODE_ONE)&&(CurrentCompoObject)&&(CurrentCompoObject->IsVisible)) {
+//    if ((BlockSelectMode==SELECTMODE_ONE)&&(CurrentCompoObject)&&(CurrentCompoObject->IsVisible)) {
+      bool bEnable = CurrentCompoObject && CurrentCompoObject->IsVisible;
+      if ((BlockSelectMode==SELECTMODE_ONE)&&(CurrentCompoObject)/*&&(CurrentCompoObject->IsVisible)*/) {
 
         qreal Ratio_X,Ratio_Y;
         ComputeBlockRatio(CurrentCompoObject,Ratio_X,Ratio_Y);
@@ -253,7 +255,7 @@ void cShotComposer::RefreshControls(bool UpdateInteractiveZone) {
         }
 
         // Position, size and rotation
-        GETUI("PosSize_X")->     setEnabled(true);
+/*        GETUI("PosSize_X")->     setEnabled(true);
         GETUI("PosSize_Y")->     setEnabled(true);
         GETUI("PosSize_Width")-> setEnabled(true);
         GETUI("PosSize_Height")->setEnabled(true);
@@ -261,6 +263,15 @@ void cShotComposer::RefreshControls(bool UpdateInteractiveZone) {
         GETDOUBLESPINBOX("PosYEd")->        setEnabled(true);
         GETDOUBLESPINBOX("WidthEd")->       setEnabled(true);
         GETDOUBLESPINBOX("HeightEd")->      setEnabled(true);
+*/
+        GETUI("PosSize_X")->     setEnabled(bEnable);
+        GETUI("PosSize_Y")->     setEnabled(bEnable);
+        GETUI("PosSize_Width")-> setEnabled(bEnable);
+        GETUI("PosSize_Height")->setEnabled(bEnable);
+        GETDOUBLESPINBOX("PosXEd")->        setEnabled(bEnable);
+        GETDOUBLESPINBOX("PosYEd")->        setEnabled(bEnable);
+        GETDOUBLESPINBOX("WidthEd")->       setEnabled(bEnable);
+        GETDOUBLESPINBOX("HeightEd")->      setEnabled(bEnable);
 
         if (ApplicationConfig->DisplayUnit==DISPLAYUNIT_PERCENT) {
             GETDOUBLESPINBOX("PosXEd")->  setRange(-200,200);                                                  GETDOUBLESPINBOX("PosXEd")->  setValue(CurrentCompoObject->x*100/Ratio_X);
@@ -275,7 +286,7 @@ void cShotComposer::RefreshControls(bool UpdateInteractiveZone) {
         }
 
         // Rotation
-        GETUI("Rotate_X")-> setEnabled(true);
+/*        GETUI("Rotate_X")-> setEnabled(true);
         GETSPINBOX("RotateXED")-> setEnabled(true);
         GETUI("ResetRotateXBT")->setEnabled(true);
         GETSLIDER("RotateXSLD")->setEnabled(true);
@@ -287,13 +298,26 @@ void cShotComposer::RefreshControls(bool UpdateInteractiveZone) {
         GETSPINBOX("RotateZED")-> setEnabled(true);
         GETUI("ResetRotateZBT")->setEnabled(true);
         GETSLIDER("RotateZSLD")->setEnabled(true);
+*/
+        GETUI("Rotate_X")-> setEnabled(bEnable);
+        GETSPINBOX("RotateXED")-> setEnabled(bEnable);
+        GETUI("ResetRotateXBT")->setEnabled(bEnable);
+        GETSLIDER("RotateXSLD")->setEnabled(bEnable);
+        GETUI("Rotate_Y")-> setEnabled(bEnable);
+        GETSPINBOX("RotateYED")-> setEnabled(bEnable);
+        GETUI("ResetRotateYBT")->setEnabled(bEnable);
+        GETSLIDER("RotateYSLD")->setEnabled(bEnable);
+        GETUI("Rotate_Z")-> setEnabled(bEnable);
+        GETSPINBOX("RotateZED")-> setEnabled(bEnable);
+        GETUI("ResetRotateZBT")->setEnabled(bEnable);
+        GETSLIDER("RotateZSLD")->setEnabled(bEnable);
 
         GETSPINBOX("RotateXED")->setValue(CurrentCompoObject->RotateXAxis);                       GETSLIDER("RotateXSLD")->setValue(CurrentCompoObject->RotateXAxis);
         GETSPINBOX("RotateYED")->setValue(CurrentCompoObject->RotateYAxis);                       GETSLIDER("RotateYSLD")->setValue(CurrentCompoObject->RotateYAxis);
         GETSPINBOX("RotateZED")->setValue(CurrentCompoObject->RotateZAxis);                       GETSLIDER("RotateZSLD")->setValue(CurrentCompoObject->RotateZAxis);
 
         // Shape part
-        GETUI("BlockShapeStyleBT")->setEnabled(true);
+/*        GETUI("BlockShapeStyleBT")->setEnabled(true);
         GETUI("BlockShapeStyleED")->setEnabled(true);
         GETUI("BackgroundFormCB")->setEnabled(true);
         GETUI("PenSizeEd")->       setEnabled(true);
@@ -303,6 +327,17 @@ void cShotComposer::RefreshControls(bool UpdateInteractiveZone) {
         GETUI("ShadowEffectCB")->  setEnabled(true);
         GETUI("ShadowEffectED")->  setEnabled(CurrentCompoObject->FormShadow!=0);
         GETUI("ShadowColorCB")->   setEnabled(CurrentCompoObject->FormShadow!=0);
+*/
+        GETUI("BlockShapeStyleBT")->setEnabled(bEnable);
+        GETUI("BlockShapeStyleED")->setEnabled(bEnable);
+        GETUI("BackgroundFormCB")->setEnabled(bEnable);
+        GETUI("PenSizeEd")->       setEnabled(bEnable);
+        GETUI("PenColorCB")->      setEnabled(CurrentCompoObject->PenSize!=0 && bEnable);
+        GETUI("PenStyleCB")->      setEnabled(CurrentCompoObject->PenSize!=0 && bEnable);
+        GETUI("OpacityCB")->       setEnabled(bEnable);
+        GETUI("ShadowEffectCB")->  setEnabled(bEnable);
+        GETUI("ShadowEffectED")->  setEnabled(CurrentCompoObject->FormShadow!=0 && bEnable);
+        GETUI("ShadowColorCB")->   setEnabled(CurrentCompoObject->FormShadow!=0 && bEnable);
 
         SetCBIndex(GETCOMBOBOX("BackgroundFormCB"),CurrentCompoObject->BackgroundForm);
         GETSPINBOX("PenSizeEd")->      setValue(int(CurrentCompoObject->PenSize));

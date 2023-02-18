@@ -70,6 +70,7 @@ DlgImageComposer::DlgImageComposer(cDiaporama *ffdProject,cApplicationConfig *Ap
 // Initialise dialog
 
 void DlgImageComposer::DoInitDialog() {
+    ToLog(LOGMSG_DEBUGTRACE,"IN:DlgImageComposer::DoInitDialog");
     cShotComposer::DoInitDialog();
 
     // Thumbnail part
@@ -159,7 +160,7 @@ void DlgImageComposer::DoInitDialog() {
 //====================================================================================================================
 
 DlgImageComposer::~DlgImageComposer() {
-    ToLog(LOGMSG_DEBUGTRACE,"IN:DlgImageComposer::DoInitDialog");
+//    ToLog(LOGMSG_DEBUGTRACE,"IN:DlgImageComposer::DoInitDialog");
 
     ffdProject->CloseUnusedLibAv(ffdProject->CurrentCol);
     delete ui;

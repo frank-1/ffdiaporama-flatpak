@@ -20,7 +20,7 @@
 
 #include "_EncodeVideo.h"
 
-#define PIXFMT      PIX_FMT_RGB24
+#define PIXFMT      AV_PIX_FMT_RGB24
 #define QTPIXFMT    QImage::Format_RGB888
 
 //*************************************************************************************************************************************************
@@ -185,11 +185,11 @@ void cEncodeVideo::CloseEncoder() {
 int cEncodeVideo::getThreadFlags(AVCodecID ID) {
     int Ret=0;
     switch (ID) {
-        case CODEC_ID_PRORES:
-        case CODEC_ID_MPEG1VIDEO:
-        case CODEC_ID_DVVIDEO:
-        case CODEC_ID_MPEG2VIDEO:   Ret=FF_THREAD_SLICE;                    break;
-        case CODEC_ID_H264 :        Ret=FF_THREAD_FRAME|FF_THREAD_SLICE;    break;
+        case AV_CODEC_ID_PRORES:
+        case AV_CODEC_ID_MPEG1VIDEO:
+        case AV_CODEC_ID_DVVIDEO:
+        case AV_CODEC_ID_MPEG2VIDEO:   Ret=FF_THREAD_SLICE;                    break;
+        case AV_CODEC_ID_H264 :        Ret=FF_THREAD_FRAME|FF_THREAD_SLICE;    break;
         default:                    Ret=FF_THREAD_FRAME;                    break;
     }
     return Ret;
@@ -383,7 +383,7 @@ bool cEncodeVideo::AddStream(AVStream **Stream,AVCodec **codec,const char *Codec
             ||(!strcmp(Container->oformat->name,"mpegts"))
             ||(!strcmp(Container->oformat->name,"3gp"))
         )
-        (*Stream)->codec->flags|=CODEC_FLAG_GLOBAL_HEADER;
+        (*Stream)->codec->flags|=AV_CODEC_FLAG_GLOBAL_HEADER;
 
     int ThreadC =((getCpuCount()-1)>1)?(getCpuCount()-1):1;
     if (ThreadC>0) (*Stream)->codec->thread_count=ThreadC;
@@ -410,8 +410,11 @@ bool cEncodeVideo::OpenVideoStream(sVideoCodecDef *VideoCodecDef,int VideoCodecS
     // Setup codec parameters
     VideoStream->codec->width               =ImageWidth;
     VideoStream->codec->height              =ImageHeight;
-    VideoStream->codec->pix_fmt             =PIX_FMT_YUV420P;
+    VideoStream->codec->pix_fmt             =AV_PIX_FMT_YUV420P;
     VideoStream->codec->time_base           =VideoFrameRate;
+    #if FFMPEGVERSIONINT>=250
+    VideoStream->time_base                  = VideoFrameRate;   //new ffmpeg 2.5.0!!!!
+    #endif
     VideoStream->codec->sample_aspect_ratio =PixelAspectRatio;
     VideoStream->sample_aspect_ratio        =PixelAspectRatio;
     if ((codec->id!=AV_CODEC_ID_H264)||(!VBR)) {
@@ -434,7 +437,7 @@ bool cEncodeVideo::OpenVideoStream(sVideoCodecDef *VideoCodecDef,int VideoCodecS
 
     } else if (codec->id==AV_CODEC_ID_MJPEG) {
         //-qscale 2 -qmin 2 -qmax 2
-        VideoStream->codec->pix_fmt             =PIX_FMT_YUVJ420P;
+        VideoStream->codec->pix_fmt             =AV_PIX_FMT_YUVJ420P;
         VideoStream->codec->qmin                =2;
         VideoStream->codec->qmax                =2;
         VideoStream->codec->bit_rate_tolerance  =(ImageWidth*ImageHeight*2*VideoFrameRate.den/VideoFrameRate.num)*2;
@@ -446,9 +449,9 @@ bool cEncodeVideo::OpenVideoStream(sVideoCodecDef *VideoCodecDef,int VideoCodecS
         VideoStream->codec->qmax    =ImageHeight<=576?63:51;                av_dict_set(&opts,"qmax",QString("%1").arg(VideoStream->codec->qmax).toUtf8(),0);
         VideoStream->codec->qmin    =ImageHeight<=576?1:11;                 av_dict_set(&opts,"qmin",QString("%1").arg(VideoStream->codec->qmin).toUtf8(),0);
         VideoStream->codec->mb_lmin =VideoStream->codec->qmin*FF_QP2LAMBDA;
-        VideoStream->codec->lmin    =VideoStream->codec->qmin*FF_QP2LAMBDA;
+//        VideoStream->codec->lmin    =VideoStream->codec->qmin*FF_QP2LAMBDA;
         VideoStream->codec->mb_lmax =VideoStream->codec->qmax*FF_QP2LAMBDA;
-        VideoStream->codec->lmax    =VideoStream->codec->qmax*FF_QP2LAMBDA;
+//        VideoStream->codec->lmax    =VideoStream->codec->qmax*FF_QP2LAMBDA;
 
         if (ImageHeight<=720) av_dict_set(&opts,"profile","0",0); else av_dict_set(&opts,"profile","1",0);
         if (ImageHeight>576)  av_dict_set(&opts,"slices","4",0);
@@ -564,7 +567,7 @@ bool cEncodeVideo::OpenVideoStream(sVideoCodecDef *VideoCodecDef,int VideoCodecS
     #endif
 
     // Create and prepare VideoFrame and VideoFrameBuf
-    VideoFrame=avcodec_alloc_frame();  // Allocate structure for RGB image
+    VideoFrame=ALLOCFRAME();  // Allocate structure for RGB image
     if (!VideoFrame) {
         ToLog(LOGMSG_CRITICAL,"EncodeVideo-OpenVideoStream: avcodec_alloc_frame() failed");
         return false;
@@ -654,7 +657,7 @@ bool cEncodeVideo::OpenAudioStream(sAudioCodecDef *AudioCodecDef,int &AudioChann
         return false;
     }
 
-    AudioFrame=avcodec_alloc_frame();
+    AudioFrame=ALLOCFRAME();
     if (AudioFrame==NULL) {
         ToLog(LOGMSG_CRITICAL,QString("EncodeVideo-OpenAudioStream:: avcodec_alloc_frame failed"));
         return false;
@@ -1095,7 +1098,11 @@ void cEncodeVideo::EncodeMusic(cDiaporamaObjectInfo *Frame,cSoundBlockList *Rend
             if (Continue) {
                 // Init AudioFrame
                 AVRational AVR;
-                avcodec_get_frame_defaults(AudioFrame);
+                #if (FFMPEGVERSIONINT>=220)
+                    av_frame_unref(AudioFrame);
+                #else
+                    avcodec_get_frame_defaults(AudioFrame);
+                #endif
                 AVR.num                     =1;
                 AVR.den                     =AudioStream->codec->sample_rate;
                 AudioFrame->nb_samples      =DestPacketSize/DestSampleSize;
@@ -1180,7 +1187,11 @@ void cEncodeVideo::EncodeVideo(QImage *SrcImage,bool &Continue) {
     int     errcode;
 
     if (Image) {
-        avcodec_get_frame_defaults(VideoFrame);
+        #if (FFMPEGVERSIONINT>=220)
+            av_frame_unref(VideoFrame);
+        #else
+            avcodec_get_frame_defaults(VideoFrame);
+        #endif
         if (avpicture_fill(
             (AVPicture *)VideoFrame,            // Frame to prepare
             VideoFrameBuf,                      // Buffer which will contain the image data

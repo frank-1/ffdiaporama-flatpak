@@ -836,7 +836,7 @@ void BlurScanLine(float *kernel,int kern_width,QRgb *source,QRgb *destination,in
             scale = 0.0;
             k = kernel;
             src = source;
-            for (i=0;i<columns;++k,src+=offset) {
+            for (i=0;i<columns;++k,src+=offset,i++) {
                 if((i >= (x-kern_width/2)) && (i <= (x+kern_width/2))) {
                     aggregate.red  +=(*k)*qRed(*src);
                     aggregate.green+=(*k)*qGreen(*src);

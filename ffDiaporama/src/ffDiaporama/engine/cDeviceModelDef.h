@@ -53,7 +53,7 @@ extern "C" {
 
 #include <libavutil/mathematics.h>
 #include <libavutil/pixdesc.h>
-#include <libavutil/audioconvert.h>
+// #include <libavutil/audioconvert.h>
 
 #include <libavcodec/avcodec.h>
 
@@ -61,7 +61,7 @@ extern "C" {
 #include <libavformat/avio.h>
 
 #include "libavfilter/avfilter.h"
-#include "libavfilter/avfiltergraph.h"
+// #include "libavfilter/avfiltergraph.h"
 
 #if (LIBAVUTIL_VERSION_MICRO<100)&&(LIBAVCODEC_VERSION_MICRO<100)&&(LIBAVFORMAT_VERSION_MICRO<100)&&(LIBAVDEVICE_VERSION_MICRO<100)&&(LIBAVFILTER_VERSION_MICRO<100)&&(LIBSWSCALE_VERSION_MICRO<100)
     #define LIBAV
@@ -85,10 +85,21 @@ extern "C" {
     #define FFMPEG
     #include "libswresample/swresample.h"
     #define RESAMPLE_MAX_CHANNELS SWR_CH_MAX
-    #include "libavfilter/avcodec.h"
+    #include "libavcodec/avcodec.h"
     #include "libavfilter/buffersink.h"
     #include "libavfilter/buffersrc.h"
-    #if     ((LIBAVUTIL_VERSION_INT>=AV_VERSION_INT(52,48,100))&&(LIBAVCODEC_VERSION_INT>=AV_VERSION_INT(55,39,100))&&(LIBAVFORMAT_VERSION_INT>=AV_VERSION_INT(55,19,104))&&(LIBAVDEVICE_VERSION_INT>=AV_VERSION_INT(55,5,100))&&(LIBAVFILTER_VERSION_INT>=AV_VERSION_INT(3,90,100))&&(LIBSWSCALE_VERSION_INT>=AV_VERSION_INT(2,5,101))&&(LIBSWRESAMPLE_VERSION_INT>=AV_VERSION_INT(0,17,104)))
+    #if     ((LIBAVUTIL_VERSION_INT>=AV_VERSION_INT(54,15,100))&&(LIBAVCODEC_VERSION_INT>=AV_VERSION_INT(56,13,100))&&(LIBAVFORMAT_VERSION_INT>=AV_VERSION_INT(56,15,102))&&   \
+             (LIBAVDEVICE_VERSION_INT>=AV_VERSION_INT(56,3,100))&&(LIBAVFILTER_VERSION_INT>=AV_VERSION_INT(5,2,103))&&(LIBSWSCALE_VERSION_INT>=AV_VERSION_INT(3,1,101))&&   \
+             (LIBSWRESAMPLE_VERSION_INT>=AV_VERSION_INT(1,1,100)))
+        #define FFMPEGVERSIONINT    250
+        #define FFMPEGVERSION       "FFmpeg 2.5 or higher"
+//        #define RESAMPLE_MAX_CHANNELS 32
+    #elif   ((LIBAVUTIL_VERSION_INT>=AV_VERSION_INT(52,66,100))&&(LIBAVCODEC_VERSION_INT>=AV_VERSION_INT(55,52,102))&&(LIBAVFORMAT_VERSION_INT>=AV_VERSION_INT(55,33,100))&& \
+              (LIBAVDEVICE_VERSION_INT>=AV_VERSION_INT(55,10,100))&&(LIBAVFILTER_VERSION_INT>=AV_VERSION_INT(4,2,100))&&(LIBSWSCALE_VERSION_INT>=AV_VERSION_INT(2,5,102))&&   \
+              (LIBSWRESAMPLE_VERSION_INT>=AV_VERSION_INT(0,18,100)))
+         #define FFMPEGVERSIONINT    220
+         #define FFMPEGVERSION       "FFmpeg 2.2 or higher"
+    #elif     ((LIBAVUTIL_VERSION_INT>=AV_VERSION_INT(52,48,100))&&(LIBAVCODEC_VERSION_INT>=AV_VERSION_INT(55,39,100))&&(LIBAVFORMAT_VERSION_INT>=AV_VERSION_INT(55,19,104))&&(LIBAVDEVICE_VERSION_INT>=AV_VERSION_INT(55,5,100))&&(LIBAVFILTER_VERSION_INT>=AV_VERSION_INT(3,90,100))&&(LIBSWSCALE_VERSION_INT>=AV_VERSION_INT(2,5,101))&&(LIBSWRESAMPLE_VERSION_INT>=AV_VERSION_INT(0,17,104)))
         #define FFMPEGVERSIONINT    210
         #define FFMPEGVERSION       "FFmpeg 2.1 or higher"
     #elif   ((LIBAVUTIL_VERSION_INT>=AV_VERSION_INT(52,38,100))&&(LIBAVCODEC_VERSION_INT>=AV_VERSION_INT(55,18,102))&&(LIBAVFORMAT_VERSION_INT>=AV_VERSION_INT(55,12,100))&&(LIBAVDEVICE_VERSION_INT>=AV_VERSION_INT(55,3,100))&&(LIBAVFILTER_VERSION_INT>=AV_VERSION_INT(3,79,101))&&(LIBSWSCALE_VERSION_INT>=AV_VERSION_INT(2,3,100))&&(LIBSWRESAMPLE_VERSION_INT>=AV_VERSION_INT(0,17,102)))
@@ -103,13 +114,18 @@ extern "C" {
     #else
         // unsupported version
     #endif
+    #if (FFMPEGVERSIONINT >=250)
+       #define RESAMPLE_MAX_CHANNELS 32
+    #else
+       #define RESAMPLE_MAX_CHANNELS SWR_CH_MAX
+    #endif
 #endif
 }
 
 #ifndef AVCODEC_MAX_AUDIO_FRAME_SIZE
     #define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
 #endif
-
+/*
 #if !defined(FF_API_CODEC_ID)
     #define AV_CODEC_ID_NONE        CODEC_ID_NONE
     #define AV_CODEC_ID_MJPEG       CODEC_ID_MJPEG
@@ -122,19 +138,19 @@ extern "C" {
     #define AV_CODEC_ID_WMV1        CODEC_ID_WMV1
     #define AV_CODEC_ID_WMV2        CODEC_ID_WMV2
     #define AV_CODEC_ID_WMV3        CODEC_ID_WMV3
-    #define AV_CODEC_ID_PCM_S16LE   CODEC_ID_PCM_S16LE
+//    #define AV_CODEC_ID_PCM_S16LE   CODEC_ID_PCM_S16LE
     #define AV_CODEC_ID_MP3         CODEC_ID_MP3
     #define AV_CODEC_ID_AAC         CODEC_ID_AAC
     #define AV_CODEC_ID_AC3         CODEC_ID_AC3
     #define AV_CODEC_ID_VORBIS      CODEC_ID_VORBIS
     #define AV_CODEC_ID_MP2         CODEC_ID_MP2
-    #define AV_CODEC_ID_AMR_WB      CODEC_ID_AMR_WB
-    #define AV_CODEC_ID_AMR_NB      CODEC_ID_AMR_NB
+//    #define AV_CODEC_ID_AMR_WB      CODEC_ID_AMR_WB
+//    #define AV_CODEC_ID_AMR_NB      CODEC_ID_AMR_NB
     #define AV_CODEC_ID_FLAC        CODEC_ID_FLAC
     #define AV_CODEC_ID_WMAV1       CODEC_ID_WMAV1
     #define AV_CODEC_ID_WMAV2       CODEC_ID_WMAV2
 #endif
-
+*/
 #if !defined(avcodec_free_frame)
     #define avcodec_free_frame  av_freep
 #endif
@@ -144,6 +160,10 @@ extern "C" {
     #undef AV_TIME_BASE_Q
     extern AVRational AV_TIME_BASE_Q;
 #endif
+//****************************************************************************************************************************************************************
+
+AVFrame *ALLOCFRAME();
+void    FREEFRAME(AVFrame **Buf);
 
 //****************************************************************************************************************************************************************
 
@@ -384,5 +404,4 @@ extern QMutex  Mutex;                                           // Mutex used to
 extern int     LastLibAvMessageLevel;                           // Last level of message received from LIBAV
 
 QString GetAvErrorMessage(int ErrorCode);
-
 #endif // CDEVICEMODELDEF_H

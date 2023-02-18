@@ -52,27 +52,30 @@ LIBS        += -lffDiaporama_lib
 DEFINES +=SHARE_DIR=\\\"$$PREFIX\\\"
 
 unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += libavformat libavcodec libavutil libswscale libavfilter libswresample
     LIBS   += -L../ffDiaporama_lib
 
     CFLAGS += -W"Missing debug information for"
+    QMAKE_CXXFLAGS += -Wno-deprecated-declarations
 
-    contains(DEFINES,Q_OS_SOLARIS) {
-
-        HARDWARE_PLATFORM = $$system(uname -m)
-        contains(HARDWARE_PLATFORM,x86_64) {
-            DEFINES+=Q_OS_SOLARIS64
-            message("Solaris x86_64 build")
-        } else {
-            DEFINES+=Q_OS_SOLARIS32
-            message("Solaris x86 build")
-        }
-        message("Use ffmpeg in /opt/gnu/include")
-        INCLUDEPATH += /opt/gnu/include
-        DEFINES     += USELIBSWRESAMPLE
-        LIBS        += -lswresample
-
-    } else {
-
+#    contains(DEFINES,Q_OS_SOLARIS) {
+#
+#        HARDWARE_PLATFORM = $$system(uname -m)
+#        contains(HARDWARE_PLATFORM,x86_64) {
+#            DEFINES+=Q_OS_SOLARIS64
+#            message("Solaris x86_64 build")
+#        } else {
+#            DEFINES+=Q_OS_SOLARIS32
+#            message("Solaris x86 build")
+#        }
+#        message("Use ffmpeg in /opt/gnu/include")
+#        INCLUDEPATH += /opt/gnu/include
+#        DEFINES     += USELIBSWRESAMPLE
+#        LIBS        += -lswresample
+#
+#    } else {
+#
         HARDWARE_PLATFORM = $$system(uname -m)
         contains(HARDWARE_PLATFORM,x86_64) {
             DEFINES+=Q_OS_LINUX64
@@ -80,37 +83,37 @@ unix {
         } else {
             DEFINES+=Q_OS_LINUX32
             message("Linux x86 build")
-        }
-
-        exists(/opt/ffmpeg/include/libswresample/swresample.h) {         #------ conditionnaly includes from Sam Rog packages for Ubuntu
-            message("Use SAM ROG Packages from /opt/ffmpeg")
-            INCLUDEPATH += /opt/ffmpeg/include/
-            LIBS        += -L"/opt/ffmpeg/lib"
-            DEFINES += USELIBSWRESAMPLE
-            LIBS    += -lswresample                                             #------ conditionnaly include libswresample
-        } else:exists(/usr/include/ffmpeg/libswresample/swresample.h) {         #------ Specific for Fedora
-            message("Use ffmpeg in /usr/include/ffmpeg")
-            DEFINES += USELIBSWRESAMPLE
-            INCLUDEPATH += /usr/include/ffmpeg/
-            LIBS    += -lswresample                                             #------ conditionnaly include libswresample
-        } else:exists(/usr/include/libswresample/swresample.h) {                #------ Specific for openSUSE
-            message("Use ffmpeg in /usr/include")
-            INCLUDEPATH += /usr/include/
-            DEFINES += USELIBSWRESAMPLE
-            LIBS    += -lswresample                                             #------ conditionnaly include libswresample
-        } else:exists(/usr/include/libavresample/avresample.h) {
-            message("Use libav 9 in /usr/include")
-            DEFINES += USELIBAVRESAMPLE
-            LIBS    += -lavresample                                             #------ conditionnaly include libavresample
-            INCLUDEPATH += /usr/include/
-        } else {
-            message("Use libav 0.8+taglib in /usr/include")
-            LIBS        += -ltag                                                #------ TAGlib is used only with LIBAV 8
-            DEFINES     += USETAGLIB
-            DEFINES     += HAVE_CONFIG_H                                        #------ specific for TAGLib
-            DEFINES     += TAGLIB_STATIC                                        #------ specific for TAGLib
-            INCLUDEPATH += /usr/include/
-        }
+#        }
+#
+#        exists(/opt/ffmpeg/include/libswresample/swresample.h) {         #------ conditionnaly includes from Sam Rog packages for Ubuntu
+#            message("Use SAM ROG Packages from /opt/ffmpeg")
+#            INCLUDEPATH += /opt/ffmpeg/include/
+#            LIBS        += -L"/opt/ffmpeg/lib"
+#            DEFINES += USELIBSWRESAMPLE
+#            LIBS    += -lswresample                                             #------ conditionnaly include libswresample
+#        } else:exists(/usr/include/ffmpeg/libswresample/swresample.h) {         #------ Specific for Fedora
+#            message("Use ffmpeg in /usr/include/ffmpeg")
+#            DEFINES += USELIBSWRESAMPLE
+#            INCLUDEPATH += /usr/include/ffmpeg/
+#            LIBS    += -lswresample                                             #------ conditionnaly include libswresample
+#        } else:exists(/usr/include/libswresample/swresample.h) {                #------ Specific for openSUSE
+#            message("Use ffmpeg in /usr/include")
+#
+#            DEFINES += USELIBSWRESAMPLE
+#            LIBS    += -lswresample                                             #------ conditionnaly include libswresample
+#        } else:exists(/usr/include/libavresample/avresample.h) {
+#            message("Use libav 9 in /usr/include")
+#            DEFINES += USELIBAVRESAMPLE
+#            LIBS    += -lavresample                                             #------ conditionnaly include libavresample
+#
+#        } else {
+#            message("Use libav 0.8+taglib in /usr/include")
+#            LIBS        += -ltag                                                #------ TAGlib is used only with LIBAV 8
+#            DEFINES     += USETAGLIB
+#            DEFINES     += HAVE_CONFIG_H                                        #------ specific for TAGLib
+#            DEFINES     += TAGLIB_STATIC                                        #------ specific for TAGLib
+#
+#        }
 
     }
 
