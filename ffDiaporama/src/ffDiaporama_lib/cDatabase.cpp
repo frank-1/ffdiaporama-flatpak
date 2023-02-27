@@ -231,11 +231,13 @@ bool cSettingsTable::SetIntValue(QString SettingName,qlonglong Value) {
     Query.prepare(QString("UPDATE %1 set IntValue=:IntValue WHERE Name=:Name").arg(TableName));
     Query.bindValue(":IntValue",Value,      QSql::In);
     Query.bindValue(":Name",    SettingName,QSql::In);
+    usleep(100); //Auswertung der Querry folgt.
     if ((!Query.exec())||(Query.numRowsAffected()==0)) {
         Query.prepare(QString("INSERT INTO %1 (Key,Name,IntValue) VALUES (:Key,:Name,:IntValue)").arg(TableName));
-        Query.bindValue(":Key",     ++NextIndex,QSql::In);
-        Query.bindValue(":IntValue",Value,      QSql::In);
-        Query.bindValue(":Name",    SettingName,QSql::In);
+        Query.bindValue(":Key",     ++NextIndex); //,QSql::In);
+        Query.bindValue(":IntValue",Value); //,      QSql::In);
+        Query.bindValue(":Name",    SettingName); //,QSql::In);
+
         Ret=Query.exec();
         if (!Ret) DisplayLastSQLError(&Query);
     }

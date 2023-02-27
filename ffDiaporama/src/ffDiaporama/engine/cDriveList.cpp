@@ -413,7 +413,7 @@ void cDriveList::UpdateDriveList() {
         QProcess    Process;
         bool        IsOk=true;
         Process.setProcessChannelMode(QProcess::MergedChannels);
-
+        usleep(100);
         Process.start("mount");
         if (!Process.waitForStarted()) {
             ToLog(LOGMSG_CRITICAL,"Impossible to execute mount");

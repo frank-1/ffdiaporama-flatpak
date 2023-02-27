@@ -30,6 +30,7 @@
     #include <QSqlDatabase>
     #include <QSqlQuery>
     #include <QSqlError>
+    #include "cBaseAppConfig.h"
 #endif
 
 //*****************************************************************************
