@@ -19,7 +19,7 @@
 # ======================================================================
 
 isEmpty(PREFIX) {
-    PREFIX = /usr
+    PREFIX = /app   # for flatpak (former /usr)
 }
 
 CONFIG += qt thread
