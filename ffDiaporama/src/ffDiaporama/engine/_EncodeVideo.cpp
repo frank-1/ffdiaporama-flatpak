@@ -346,7 +346,8 @@ bool cEncodeVideo::OpenEncoder(cDiaporama *Diaporama,QString OutputFileName,int 
 //*************************************************************************************************************************************************
 
 bool cEncodeVideo::AddStream(AVStream **Stream,AVCodec **codec,const char *CodecName,AVMediaType Type) {
-    *codec=avcodec_find_encoder_by_name(CodecName);
+    if (strcmp(CodecName,"h264") == 0) *codec=avcodec_find_encoder_by_name("libx264");
+        else *codec=avcodec_find_encoder_by_name(CodecName);
     if (!(*codec)) {
         ToLog(LOGMSG_CRITICAL,QString("EncodeVideo-AddStream: Unable to find codec %1").arg(CodecName));
         return false;
