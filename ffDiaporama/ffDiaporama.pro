@@ -25,7 +25,7 @@
 #--------------------------------------------------------------
 
 isEmpty(PREFIX) {
-    PREFIX = /usr
+    PREFIX = /app   # for flatpak (former /usr)
 }
 
 # this file is to be used by qmake for Windows & Linux
